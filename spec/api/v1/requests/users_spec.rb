@@ -1,7 +1,6 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :request do
-    let(:headers) { { "Accept" => "application/json" } }
     let(:user_attributes) {
         {
             email: Faker::Internet.email,
@@ -17,6 +16,7 @@ RSpec.describe User, type: :request do
         ) 
     }
     let(:user_id) { user.id }
+    let(:headers) { { "Accept" => "application/json", "Authorization" => user.auth_token} }
 
     before { host! "localhost:3000/api" }
 
@@ -82,8 +82,7 @@ RSpec.describe User, type: :request do
                 expect(response).to have_http_status(200)
             end
             it "[update] return new data for updated user" do
-                user_body = JSON.parse(response.body)
-                expect(user_body["email"]).to eq(user_param[:email])
+                expect(json_body["email"]).to eq(user_param[:email])
             end
         end
         context "invalid request:" do
@@ -95,8 +94,7 @@ RSpec.describe User, type: :request do
                 expect(response).to have_http_status(422)
             end
             it "[update] found errors" do
-                user_body = JSON.parse(response.body)
-                expect(user_body).to have_key('errors')
+                expect(json_body).to have_key('errors')
             end
         end
     end
